@@ -16,15 +16,14 @@ use Illuminate\Support\Facades\Cache;
 
 class UserController extends Controller
 {
-    /**
-     * @return JsonResource
-     */
-    public function index(): JsonResource
+
+    public function index()
     {
         $users = User::query()
+            ->with('tasks')
             ->paginate(10);
 
-        return new UserCollection($users);
+        return $this->successResponse(new UserCollection($users));
     }
 
     /**
@@ -44,6 +43,7 @@ class UserController extends Controller
     {
         $user = Cache::remember(User::class . ":{$id}", 60 * 10, function() use($id) {
             return User::query()
+                ->with('tasks')
                 ->first($id);
         });
 

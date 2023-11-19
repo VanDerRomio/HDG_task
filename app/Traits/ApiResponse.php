@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 trait ApiResponse
 {
@@ -15,6 +16,14 @@ trait ApiResponse
         mixed $data = null,
         array $responseConstantArray = ['code' => 200, 'message' => '']
     ): JsonResponse{
+        if($data instanceof JsonResource){
+            $data = (array)($data);
+
+            if(isset($data['resource'])){
+                $data = $data['resource'];
+            }
+        }
+
         return response()
             ->json([
                 'status'    => 'ok',

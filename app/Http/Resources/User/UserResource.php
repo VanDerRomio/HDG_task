@@ -22,7 +22,7 @@ class UserResource extends JsonResource
             'role'              => UserRole::tryFrom($this->role)?->name ?: $this->role,
             'email'             => $this->email,
             'email_verified_at' => $this->email_verified_at,
-            'tasks'             => TaskCollection::collection($this->tasks),
+            'tasks'             => new TaskCollection($this->whenLoaded('tasks')),
             'created_at'        => $this->created_at,
             'updated_at'        => $this->updated_at,
         ];

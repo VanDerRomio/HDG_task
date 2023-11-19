@@ -19,7 +19,7 @@ class TaskResource extends JsonResource
     {
         return [
             'id'                => $this->id,
-            'user'              => UserResource::make($this->user),
+            'user'              => new UserResource($this->whenLoaded('user')),
             'title'             => $this->title,
             'description'       => $this->description,
             'description_small' => Str::limit($this->description, 30),

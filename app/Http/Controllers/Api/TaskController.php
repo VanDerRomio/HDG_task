@@ -17,14 +17,15 @@ use Illuminate\Support\Facades\Cache;
 class TaskController extends Controller
 {
     /**
-     * @return JsonResource
+     * @return JsonResponse|JsonResource
      */
-    public function index(): JsonResource
+    public function index(): JsonResponse|JsonResource
     {
         $tasks = Task::query()
+            ->with('user')
             ->paginate(10);
 
-        return new TaskCollection($tasks);
+        return $this->successResponse((new TaskCollection($tasks)));
     }
 
     /**
@@ -44,6 +45,7 @@ class TaskController extends Controller
     {
         $task = Cache::remember(Task::class . ":{$id}", 60 * 10, function() use($id) {
             return Task::query()
+                ->with('user')
                 ->first($id);
         });
 
