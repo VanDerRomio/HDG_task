@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Task;
 
-use App\Enums\UserRole;
+use App\Enums\TaskStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class StoreUserRequest extends FormRequest
+class StoreTaskRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -24,22 +24,19 @@ class StoreUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => [
+            'user_id' => [
                 'required',
-                'max:255'
+                'numeric'
             ],
-            'email' => [
+            'title' => [
                 'required',
-                'email',
-                'unique:users'
+                'max:255',
             ],
-            'password' => [
-                'required',
-                'min:4',
-                'max:20',
+            'description' => [
+                'nullable',
             ],
-            'role' => [
-                Rule::enum(UserRole::class),
+            'status' => [
+                Rule::enum(TaskStatus::class),
             ],
         ];
     }

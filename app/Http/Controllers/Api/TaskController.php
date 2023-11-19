@@ -2,50 +2,81 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\ResponseStatusCodes;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreTaskRequest;
-use App\Http\Requests\UpdateTaskRequest;
+use App\Http\Requests\Task\StoreTaskRequest;
+use App\Http\Requests\Task\UpdateTaskRequest;
+use App\Http\Resources\Task\TaskCollection;
+use App\Http\Resources\Task\TaskResource;
+use App\Models\Task;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Cache;
 
 class TaskController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * @return JsonResource
      */
-    public function index()
+    public function index(): JsonResource
     {
-        //
+        $tasks = Task::query()
+            ->paginate(10);
+
+        return new TaskCollection($tasks);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * @param StoreTaskRequest $request
+     * @return JsonResponse|JsonResource
      */
-    public function store(StoreTaskRequest $request)
+    public function store(StoreTaskRequest $request): JsonResponse|JsonResource
     {
         $data = $request->validated();
     }
 
     /**
-     * Display the specified resource.
+     * @param string $id
+     * @return JsonResponse|JsonResource
      */
-    public function show(string $id)
+    public function show(string $id): JsonResponse|JsonResource
     {
-        //
+        $task = Cache::remember(Task::class . ":{$id}", 60 * 10, function() use($id) {
+            return Task::query()
+                ->first($id);
+        });
+
+        if(!$task){
+            return $this->errorResponse(ResponseStatusCodes::RESPONSE_STATUS_CODE_1012);
+        }
+
+        return new TaskResource($task);
     }
 
     /**
-     * Update the specified resource in storage.
+     * @param UpdateTaskRequest $request
+     * @param string $id
+     * @return JsonResponse
      */
-    public function update(UpdateTaskRequest $request, string $id)
+    public function update(UpdateTaskRequest $request, string $id): JsonResponse
     {
         $data = $request->validated();
     }
 
     /**
-     * Remove the specified resource from storage.
+     * @param string $id
+     * @return JsonResponse
      */
-    public function destroy(string $id)
+    public function destroy(string $id): JsonResponse
     {
-        //
+        $task = Task::query()
+            ->firstOrFail($id);
+
+        if($task->delete()){
+            return $this->successResponse();
+        }
+
+        return $this->errorResponse(ResponseStatusCodes::RESPONSE_STATUS_CODE_1014);
     }
 }

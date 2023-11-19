@@ -33,3 +33,7 @@ Route::middleware('api')
                 Route::delete('/{id}',  'delete');
             });
     });
+
+Route::fallback(function () {
+    response()->json(['404']);
+});
