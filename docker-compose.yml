@@ -1,0 +1,83 @@
+version: '3'
+
+services:
+  #PHP Service
+  tasks_api_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: digitalocean.com/php
+    container_name: tasks_api_app
+    restart: unless-stopped
+    tty: true
+    environment:
+      SERVICE_NAME: tasks_api_app
+      SERVICE_TAGS: dev
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+      - ./php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - tasks_api_app-network
+
+  # nginx Service
+  tasks_api_webserver:
+    image: nginx:alpine
+    container_name: tasks_api_webserver
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "91:80"
+#      - "443:443"
+    volumes:
+      - ./:/var/www
+      - ./nginx/conf.d/:/etc/nginx/conf.d/
+    networks:
+      - tasks_api_app-network
+
+  # postgres service     +
+  tasks_api_db:
+    image: postgres
+    container_name: tasks_api_db
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: postgres
+      SERVICE_TAGS: dev
+      SERVICE_NAME: postgres
+    volumes:
+      - dbdata_postgres_tasks_api:/var/lib/postgresql/data/
+    networks:
+      - tasks_api_app-network
+
+  tasks_api_redis:
+    container_name: tasks_api_redis
+    image: redis:latest
+    restart: always
+    ports:
+      - "6379:6379"
+#    volumes:
+#      - ./redis:/root/redis
+#      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_PASSWORD=
+      - REDIS_PORT=6379
+      - REDIS_DATABASES=1
+    networks:
+      - tasks_api_app-network
+
+# docker networks
+networks:
+  tasks_api_app-network:
+    driver: bridge
+
+# volumes
+volumes:
+  dbdata_postgres_tasks_api:
+    driver: local
+  data_redis:
+      driver: local
