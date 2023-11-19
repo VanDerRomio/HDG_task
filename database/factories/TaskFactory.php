@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Enums\TaskStatus;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -16,8 +18,16 @@ class TaskFactory extends Factory
      */
     public function definition(): array
     {
+        $user = User::query()
+            ->select('id')
+            ->inRandomOrder()
+            ->first();
+
         return [
-            //
+            'user_id'       => $user?->id ?? User::factory()->create(),
+            'title'         => fake()->words(fake()->numberBetween(6, 20), true),
+            'description'   => fake()->text(),
+            'status'        => fake()->randomElement(TaskStatus::valuesAsArray()),
         ];
     }
 }
