@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\DTO\Task\PostTaskForm;
+use App\DTO\Task\PutTaskForm;
 use App\Helpers\ResponseStatusCodes;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Task\StoreTaskRequest;
@@ -11,15 +13,14 @@ use App\Http\Resources\Task\TaskResource;
 use App\Models\Task;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Cache;
 
 class TaskController extends Controller
 {
     /**
-     * @return JsonResponse|JsonResource
+     * @return JsonResponse
      */
-    public function index(): JsonResponse|JsonResource
+    public function index(): JsonResponse
     {
         $tasks = Task::query()
             ->with('user')
@@ -30,18 +31,21 @@ class TaskController extends Controller
 
     /**
      * @param StoreTaskRequest $request
-     * @return JsonResponse|JsonResource
+     * @return JsonResponse
      */
-    public function store(StoreTaskRequest $request): JsonResponse|JsonResource
+    public function store(StoreTaskRequest $request): JsonResponse
     {
         $data = $request->validated();
+
+        $postTaskForm = PostTaskForm::fromArray($data);
+
     }
 
     /**
      * @param string $id
-     * @return JsonResponse|JsonResource
+     * @return JsonResponse
      */
-    public function show(string $id): JsonResponse|JsonResource
+    public function show(string $id): JsonResponse
     {
         $task = Cache::remember(Task::class . ":{$id}", 60 * 10, function() use($id) {
             return Task::query()
@@ -53,7 +57,7 @@ class TaskController extends Controller
             return $this->errorResponse(ResponseStatusCodes::RESPONSE_STATUS_CODE_1012);
         }
 
-        return new TaskResource($task);
+        return $this->successResponse((new TaskResource($task)));
     }
 
     /**
@@ -64,6 +68,8 @@ class TaskController extends Controller
     public function update(UpdateTaskRequest $request, string $id): JsonResponse
     {
         $data = $request->validated();
+
+        $putTaskForm = PutTaskForm::fromArray($data);
     }
 
     /**

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\DTO\User\PostUserForm;
+use App\DTO\User\PutUserForm;
 use App\Helpers\ResponseStatusCodes;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\User\StoreUserRequest;
@@ -11,13 +13,15 @@ use App\Http\Resources\User\UserResource;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Cache;
 
 class UserController extends Controller
 {
 
-    public function index()
+    /**
+     * @return JsonResponse
+     */
+    public function index(): JsonResponse
     {
         $users = User::query()
             ->with('tasks')
@@ -28,18 +32,20 @@ class UserController extends Controller
 
     /**
      * @param StoreUserRequest $request
-     * @return JsonResponse|JsonResource
+     * @return JsonResponse
      */
-    public function store(StoreUserRequest $request): JsonResponse|JsonResource
+    public function store(StoreUserRequest $request): JsonResponse
     {
         $data = $request->validated();
+
+        $postUserForm = PostUserForm::fromArray($data);
     }
 
     /**
      * @param string $id
-     * @return JsonResponse|JsonResource
+     * @return JsonResponse
      */
-    public function show(string $id): JsonResponse|JsonResource
+    public function show(string $id): JsonResponse
     {
         $user = Cache::remember(User::class . ":{$id}", 60 * 10, function() use($id) {
             return User::query()
@@ -51,7 +57,7 @@ class UserController extends Controller
             return $this->errorResponse(ResponseStatusCodes::RESPONSE_STATUS_CODE_1011);
         }
 
-        return new UserResource($user);
+        return $this->successResponse((new UserResource($user)));
     }
 
     /**
@@ -62,6 +68,8 @@ class UserController extends Controller
     public function update(UpdateUserRequest $request, string $id): JsonResponse
     {
         $data = $request->validated();
+
+        $putUserForm = PutUserForm::fromArray($data);
     }
 
     /**
