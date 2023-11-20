@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\DTO\Task\PostTaskForm;
 use App\DTO\Task\PutTaskForm;
+use App\Enums\UserRole;
 use App\Helpers\ResponseStatusCodes;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Task\StoreTaskRequest;
@@ -11,6 +12,7 @@ use App\Http\Requests\Task\UpdateTaskRequest;
 use App\Http\Resources\Task\TaskCollection;
 use App\Http\Resources\Task\TaskResource;
 use App\Models\Task;
+use App\Models\User;
 use App\Services\TaskService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -27,8 +29,17 @@ class TaskController extends Controller
      */
     public function index(): JsonResponse
     {
+        if($this->authenticatedUser->cannot('viewAny', Task::class)){
+            return $this->errorResponse(ResponseStatusCodes::RESPONSE_STATUS_CODE_1003);
+        }
+
+        $userId = $this->authenticatedUser->id;
+
         $tasks = Task::query()
             ->with('user')
+            ->when($this->authenticatedUser->role === UserRole::User->value, function($query) use($userId){
+                return $query->where('user_id', $userId);
+            })
             ->paginate(10);
 
         return $this->successResponse((new TaskCollection($tasks)));
@@ -38,9 +49,14 @@ class TaskController extends Controller
      * @param StoreTaskRequest $request
      * @param TaskService $taskService
      * @return JsonResponse
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function store(StoreTaskRequest $request, TaskService $taskService): JsonResponse
     {
+        if($this->authenticatedUser->cannot('store', Task::class)){
+            return $this->errorResponse(ResponseStatusCodes::RESPONSE_STATUS_CODE_1003);
+        }
+
         $postTaskForm = PostTaskForm::fromArray($request->validated());
 
         $task = $taskService->create($postTaskForm);
@@ -68,6 +84,10 @@ class TaskController extends Controller
             return $this->errorResponse(ResponseStatusCodes::RESPONSE_STATUS_CODE_1012);
         }
 
+        if($this->authenticatedUser->cannot('view', $task)){
+            return $this->errorResponse(ResponseStatusCodes::RESPONSE_STATUS_CODE_1003);
+        }
+
         return $this->successResponse((new TaskResource($task)));
     }
 
@@ -88,6 +108,10 @@ class TaskController extends Controller
         $task = Task::query()
             ->findOrFail($id);
 
+        if($this->authenticatedUser->cannot('update', $task)){
+            return $this->errorResponse(ResponseStatusCodes::RESPONSE_STATUS_CODE_1003);
+        }
+
         $updatedTask = $taskService->update($task, $putTaskForm);
 
         if($updatedTask){
@@ -107,6 +131,10 @@ class TaskController extends Controller
         $task = Task::query()
             ->findOrFail($id);
 
+        if($this->authenticatedUser->cannot('update', $task)){
+            return $this->errorResponse(ResponseStatusCodes::RESPONSE_STATUS_CODE_1003);
+        }
+
         $changeState = $taskService->changeState($task);
 
         if($changeState){
@@ -125,6 +153,10 @@ class TaskController extends Controller
     {
         $task = Task::query()
             ->findOrFail($id);
+
+        if($this->authenticatedUser->cannot('delete', $task)){
+            return $this->errorResponse(ResponseStatusCodes::RESPONSE_STATUS_CODE_1003);
+        }
 
         if($taskService->delete($task)){
             return $this->successResponse();

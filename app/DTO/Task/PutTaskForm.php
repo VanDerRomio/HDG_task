@@ -27,7 +27,7 @@ readonly class PutTaskForm implements IDTO
         $this->status       = $status ?: TaskStatus::New->value;
     }
 
-    public static function fromArray(array $data, int $id): self{
+    public static function fromArray(array $data, ?int $id = null): self{
         return new self(
             id:             $id,
             userId:         $data['user_id'],

@@ -27,7 +27,7 @@ readonly class PutUserForm implements IDTO
         $this->role     = $role ?: UserRole::User->value;
     }
 
-    public static function fromArray(array $data, int $id): self{
+    public static function fromArray(array $data, ?int $id = null): self{
         return new self(
             id:         $id,
             name:       $data['name']       ?? null,
