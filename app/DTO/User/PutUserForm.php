@@ -7,17 +7,17 @@ use App\Enums\UserRole;
 readonly class PutUserForm
 {
     public int $id;
-    public string $name;
-    public string $email;
-    public string $password;
-    public string $role;
+    public ?string $name;
+    public ?string $email;
+    public ?string $password;
+    public ?string $role;
 
     public function __construct(
         int $id,
-        string $name,
-        string $email,
-        string $password,
-        ?string $role = null
+        ?string $name       = null,
+        ?string $email      = null,
+        ?string $password   = null,
+        ?string $role       = null
     ){
         $this->id       = $id;
         $this->name     = $name;
@@ -26,13 +26,13 @@ readonly class PutUserForm
         $this->role     = $role ?: UserRole::User->value;
     }
 
-    public static function fromArray(array $data): self{
+    public static function fromArray(array $data, int $id): self{
         return new self(
-            id:         $data['id'],
-            name:       $data['name'],
-            email:      $data['email'],
-            password:   $data['password'],
-            role:       $data['role'] ?? null,
+            id:         $id,
+            name:       $data['name']       ?? null,
+            email:      $data['email']      ?? null,
+            password:   $data['password']   ?? null,
+            role:       $data['role']       ?? null,
         );
     }
 }

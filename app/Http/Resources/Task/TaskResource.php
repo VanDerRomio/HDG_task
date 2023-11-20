@@ -24,8 +24,8 @@ class TaskResource extends JsonResource
             'description'       => $this->description,
             'description_small' => Str::limit($this->description, 30),
             'status'            => TaskStatus::tryFrom($this->status)?->name ?: $this->status,
-            'created_at'        => $this->created_at,
-            'updated_at'        => $this->updated_at,
+            'created_at'        => $this->created_at?->format('Y-m-d H:i:s'),
+            'updated_at'        => $this->updated_at?->format('Y-m-d H:i:s'),
         ];
     }
 }

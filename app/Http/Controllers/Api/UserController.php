@@ -11,6 +11,7 @@ use App\Http\Requests\User\UpdateUserRequest;
 use App\Http\Resources\User\UserCollection;
 use App\Http\Resources\User\UserResource;
 use App\Models\User;
+use App\Services\UserService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -32,13 +33,20 @@ class UserController extends Controller
 
     /**
      * @param StoreUserRequest $request
+     * @param UserService $userService
      * @return JsonResponse
      */
-    public function store(StoreUserRequest $request): JsonResponse
+    public function store(StoreUserRequest $request, UserService $userService): JsonResponse
     {
-        $data = $request->validated();
+        $postUserForm = PostUserForm::fromArray($request->validated());
 
-        $postUserForm = PostUserForm::fromArray($data);
+        $user = $userService->create($postUserForm);
+
+        if($user){
+            return $this->successResponse(new UserResource($user));
+        }
+
+        return $this->errorResponse(ResponseStatusCodes::RESPONSE_STATUS_CODE_1013);
     }
 
     /**
@@ -50,7 +58,7 @@ class UserController extends Controller
         $user = Cache::remember(User::class . ":{$id}", 60 * 10, function() use($id) {
             return User::query()
                 ->with('tasks')
-                ->first($id);
+                ->find($id);
         });
 
         if(!$user){
@@ -63,28 +71,44 @@ class UserController extends Controller
     /**
      * @param UpdateUserRequest $request
      * @param string $id
+     * @param UserService $userService
      * @return JsonResponse
      */
-    public function update(UpdateUserRequest $request, string $id): JsonResponse
+    public function update(
+        UpdateUserRequest $request,
+        string $id,
+        UserService $userService): JsonResponse
     {
-        $data = $request->validated();
+        $putUserForm = PutUserForm::fromArray($request->validated(), $id);
 
-        $putUserForm = PutUserForm::fromArray($data);
+        $user = User::query()
+            ->findOrFail($id);
+
+        $updatedUser = $userService->update($user, $putUserForm);
+
+        if($updatedUser){
+            return $this->successResponse(new UserResource($updatedUser));
+        }
+
+        return $this->errorResponse(ResponseStatusCodes::RESPONSE_STATUS_CODE_1014);
     }
 
     /**
      * @param string $id
+     * @param UserService $userService
      * @return JsonResponse
      */
-    public function destroy(string $id): JsonResponse
+    public function destroy(string $id, UserService $userService): JsonResponse
     {
         $user = User::query()
-            ->firstOrFail($id);
+            ->findOrFail($id);
 
-        if($user->delete()){
+        $isDeleted = $userService->delete($user);
+
+        if($isDeleted){
             return $this->successResponse();
         }
 
-        return $this->errorResponse(ResponseStatusCodes::RESPONSE_STATUS_CODE_1013);
+        return $this->errorResponse(ResponseStatusCodes::RESPONSE_STATUS_CODE_1015);
     }
 }

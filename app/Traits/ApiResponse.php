@@ -16,13 +16,13 @@ trait ApiResponse
         mixed $data = null,
         array $responseConstantArray = ['code' => 200, 'message' => '']
     ): JsonResponse{
-        if($data instanceof JsonResource){
+        /*if($data instanceof JsonResource){
             $data = (array)($data);
 
             if(isset($data['resource'])){
                 $data = $data['resource'];
             }
-        }
+        }*/
 
         return response()
             ->json([

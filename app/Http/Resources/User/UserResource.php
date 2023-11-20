@@ -21,10 +21,10 @@ class UserResource extends JsonResource
             'name'              => $this->name,
             'role'              => UserRole::tryFrom($this->role)?->name ?: $this->role,
             'email'             => $this->email,
-            'email_verified_at' => $this->email_verified_at,
+            'email_verified_at' => $this->email_verified_at?->format('Y-m-d H:i:s'),
             'tasks'             => new TaskCollection($this->whenLoaded('tasks')),
-            'created_at'        => $this->created_at,
-            'updated_at'        => $this->updated_at,
+            'created_at'        => $this->created_at?->format('Y-m-d H:i:s'),
+            'updated_at'        => $this->updated_at?->format('Y-m-d H:i:s'),
         ];
     }
 }

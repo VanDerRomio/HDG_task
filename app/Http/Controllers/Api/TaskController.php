@@ -11,6 +11,7 @@ use App\Http\Requests\Task\UpdateTaskRequest;
 use App\Http\Resources\Task\TaskCollection;
 use App\Http\Resources\Task\TaskResource;
 use App\Models\Task;
+use App\Services\TaskService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -31,14 +32,20 @@ class TaskController extends Controller
 
     /**
      * @param StoreTaskRequest $request
+     * @param TaskService $taskService
      * @return JsonResponse
      */
-    public function store(StoreTaskRequest $request): JsonResponse
+    public function store(StoreTaskRequest $request, TaskService $taskService): JsonResponse
     {
-        $data = $request->validated();
+        $postTaskForm = PostTaskForm::fromArray($request->validated());
 
-        $postTaskForm = PostTaskForm::fromArray($data);
+        $task = $taskService->create($postTaskForm);
 
+        if($task){
+            return $this->successResponse(new TaskResource($task));
+        }
+
+        return $this->errorResponse(ResponseStatusCodes::RESPONSE_STATUS_CODE_1016);
     }
 
     /**
@@ -50,7 +57,7 @@ class TaskController extends Controller
         $task = Cache::remember(Task::class . ":{$id}", 60 * 10, function() use($id) {
             return Task::query()
                 ->with('user')
-                ->first($id);
+                ->find($id);
         });
 
         if(!$task){
@@ -63,28 +70,43 @@ class TaskController extends Controller
     /**
      * @param UpdateTaskRequest $request
      * @param string $id
+     * @param TaskService $taskService
      * @return JsonResponse
      */
-    public function update(UpdateTaskRequest $request, string $id): JsonResponse
+    public function update(
+        UpdateTaskRequest $request,
+        string $id,
+        TaskService $taskService
+    ): JsonResponse
     {
-        $data = $request->validated();
+        $putTaskForm = PutTaskForm::fromArray($request->validated());
 
-        $putTaskForm = PutTaskForm::fromArray($data);
+        $task = Task::query()
+            ->findOrFail($id);
+
+        $updatedTask = $taskService->update($task, $putTaskForm);
+
+        if($updatedTask){
+            return $this->successResponse(new TaskResource($updatedTask));
+        }
+
+        return $this->errorResponse(ResponseStatusCodes::RESPONSE_STATUS_CODE_1017);
     }
 
     /**
      * @param string $id
+     * @param TaskService $taskService
      * @return JsonResponse
      */
-    public function destroy(string $id): JsonResponse
+    public function destroy(string $id, TaskService $taskService): JsonResponse
     {
         $task = Task::query()
-            ->firstOrFail($id);
+            ->findOrFail($id);
 
-        if($task->delete()){
+        if($taskService->delete($task)){
             return $this->successResponse();
         }
 
-        return $this->errorResponse(ResponseStatusCodes::RESPONSE_STATUS_CODE_1014);
+        return $this->errorResponse(ResponseStatusCodes::RESPONSE_STATUS_CODE_1018);
     }
 }

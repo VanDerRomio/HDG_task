@@ -26,9 +26,9 @@ readonly class PutTaskForm
         $this->status       = $status ?: TaskStatus::New->value;
     }
 
-    public static function fromArray(array $data): self{
+    public static function fromArray(array $data, int $id): self{
         return new self(
-            id:             $data['id'],
+            id:             $id,
             userId:         $data['user_id'],
             title:          $data['title'],
             description:    $data['description']    ?? null,

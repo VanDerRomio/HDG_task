@@ -19,7 +19,7 @@ Route::middleware('api')
                 Route::post('/',        'store');
                 Route::get('/{id}',     'show');
                 Route::put('/{id}',     'update');
-                Route::delete('/{id}',  'delete');
+                Route::delete('/{id}',  'destroy');
             });
 
         Route::controller(UserController::class)
@@ -30,7 +30,7 @@ Route::middleware('api')
                 Route::post('/',        'store');
                 Route::get('/{id}',     'show');
                 Route::put('/{id}',     'update');
-                Route::delete('/{id}',  'delete');
+                Route::delete('/{id}',  'destroy');
             });
     });
 
