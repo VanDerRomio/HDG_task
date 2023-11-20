@@ -18,6 +18,9 @@ use Illuminate\Support\Facades\Cache;
 
 class UserController extends Controller
 {
+    public function __construct(Request $request){
+        $this->setAuthenticatedUser($request);
+    }
 
     /**
      * @return JsonResponse

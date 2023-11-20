@@ -9,7 +9,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::middleware('api')
+Route::middleware(['api', 'auth.basic'])
     ->group(function() {
         Route::controller(TaskController::class)
             ->prefix('tasks')

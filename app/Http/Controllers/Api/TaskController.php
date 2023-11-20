@@ -18,6 +18,10 @@ use Illuminate\Support\Facades\Cache;
 
 class TaskController extends Controller
 {
+    public function __construct(Request $request){
+        $this->setAuthenticatedUser($request);
+    }
+
     /**
      * @return JsonResponse
      */

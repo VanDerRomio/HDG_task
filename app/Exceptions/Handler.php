@@ -13,6 +13,7 @@ use Illuminate\Session\TokenMismatchException;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Exception\SuspiciousOperationException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Throwable;
 
@@ -106,6 +107,9 @@ class Handler extends ExceptionHandler
             if ($exception->errorInfo[1] == 1451) {
                 return $this->errorResponse(ResponseStatusCodes::RESPONSE_STATUS_CODE_1009);
             }
+        }
+        if ($exception instanceof UnauthorizedHttpException) {
+            return $this->errorResponse(ResponseStatusCodes::RESPONSE_STATUS_CODE_1001);
         }
 
         return $this->errorResponse(ResponseStatusCodes::RESPONSE_STATUS_CODE_1010);
