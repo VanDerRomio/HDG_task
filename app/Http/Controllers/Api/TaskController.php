@@ -98,6 +98,25 @@ class TaskController extends Controller
      * @param TaskService $taskService
      * @return JsonResponse
      */
+    public function changeState(string $id, TaskService $taskService): JsonResponse
+    {
+        $task = Task::query()
+            ->findOrFail($id);
+
+        $changeState = $taskService->changeState($task);
+
+        if($changeState){
+            return $this->successResponse();
+        }
+
+        return $this->errorResponse(ResponseStatusCodes::RESPONSE_STATUS_CODE_1019);
+    }
+
+    /**
+     * @param string $id
+     * @param TaskService $taskService
+     * @return JsonResponse
+     */
     public function destroy(string $id, TaskService $taskService): JsonResponse
     {
         $task = Task::query()

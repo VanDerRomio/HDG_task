@@ -95,4 +95,9 @@ class ResponseStatusCodes
         'code'      => 1018,
         'message'   => 'Failed to delete task',
     ];
+
+    const RESPONSE_STATUS_CODE_1019 = [
+        'code'      => 1019,
+        'message'   => 'Failed to update state of task',
+    ];
 }
