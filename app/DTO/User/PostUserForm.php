@@ -2,9 +2,10 @@
 
 namespace App\DTO\User;
 
+use App\Contracts\DTO\IDTO;
 use App\Enums\UserRole;
 
-readonly class PostUserForm
+readonly class PostUserForm implements IDTO
 {
     public string $name;
     public string $email;

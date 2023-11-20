@@ -2,9 +2,10 @@
 
 namespace App\DTO\Task;
 
+use App\Contracts\DTO\IDTO;
 use App\Enums\TaskStatus;
 
-readonly class PostTaskForm
+readonly class PostTaskForm implements IDTO
 {
     public int $userId;
     public string $title;

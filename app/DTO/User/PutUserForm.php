@@ -2,9 +2,10 @@
 
 namespace App\DTO\User;
 
+use App\Contracts\DTO\IDTO;
 use App\Enums\UserRole;
 
-readonly class PutUserForm
+readonly class PutUserForm implements IDTO
 {
     public int $id;
     public ?string $name;
