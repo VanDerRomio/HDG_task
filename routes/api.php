@@ -13,25 +13,25 @@ Route::middleware(['api', 'auth.basic'])
     ->group(function() {
         Route::controller(TaskController::class)
             ->prefix('tasks')
-            ->name('.tasks')
+            ->name('tasks.')
             ->group(function () {
-                Route::get('/',                     'index');
-                Route::post('/',                    'store');
-                Route::get('/{id}',                 'show');
-                Route::put('/{id}',                 'update');
-                Route::put('/change-state/{id}',    'changeState');
-                Route::delete('/{id}',              'destroy');
+                Route::get('/',                     'index'         )->name('index');
+                Route::post('/',                    'store'         )->name('store');
+                Route::get('/{id}',                 'show'          )->name('show');
+                Route::put('/{id}',                 'update'        )->name('update');
+                Route::put('/change-state/{id}',    'changeState'   )->name('changeState');
+                Route::delete('/{id}',              'destroy'       )->name('destroy');
             });
 
         Route::controller(UserController::class)
             ->prefix('users')
-            ->name('.users')
+            ->name('users.')
             ->group(function () {
-                Route::get('/',         'index');
-                Route::post('/',        'store');
-                Route::get('/{id}',     'show');
-                Route::put('/{id}',     'update');
-                Route::delete('/{id}',  'destroy');
+                Route::get('/',         'index'     )->name('index');
+                Route::post('/',        'store'     )->name('store');
+                Route::get('/{id}',     'show'      )->name('show');
+                Route::put('/{id}',     'update'    )->name('update');
+                Route::delete('/{id}',  'destroy'   )->name('destroy');
             });
     });
 

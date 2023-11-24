@@ -1,4 +1,4 @@
-version: '3'
+version: '3.6'
 
 services:
   #PHP Service
@@ -37,7 +37,7 @@ services:
 
   # postgres service     +
   tasks_api_db:
-    image: postgres
+    image: postgres:16.1
     container_name: tasks_api_db
     restart: unless-stopped
     tty: true
@@ -50,6 +50,7 @@ services:
       SERVICE_NAME: postgres
     volumes:
       - dbdata_postgres_tasks_api:/var/lib/postgresql/data/
+      - ./postgres_init:/docker-entrypoint-initdb.d
     networks:
       - tasks_api_app-network
 
