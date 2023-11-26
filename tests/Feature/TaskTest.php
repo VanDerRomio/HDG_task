@@ -284,6 +284,80 @@ class TaskTest extends TestCase
         });
     }
 
+    // UPDATE (change-state) endpoints
+    public function test_endpoint_change_state_returns_a_successful_response(): void
+    {
+        $user = $this->createUser();
+        $task = Task::factory()->create([
+            'user_id'       => $user->id,
+            'title'         => fake()->words(fake()->numberBetween(6, 20), true),
+            'description'   => fake()->text(),
+            'status'        => TaskStatus::New->value,
+        ]);
+
+        $response = $this->withBasicAuth($user->email, "password")
+            ->put(route('tasks.changeState', $task->id));
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'status'    => 'ok',
+            'message'   => "",
+            'code'      => 200,
+        ]);
+
+        $this->assertDatabaseHas('tasks', [
+            'id'        => $task->id,
+            'user_id'   => $user->id,
+            'status'    => TaskStatus::InProcessing->value,
+        ]);
+    }
+
+    public function test_endpoint_change_state_returns_a_unauthenticated_response(): void
+    {
+        $task = $this->createTask();
+        $user = $task->user;
+
+        $response = $this->withBasicAuth($user->email, "empty")
+            ->put(route('tasks.changeState', $task->id),);
+
+        $response->assertStatus(400);
+        $response->assertJson([
+            'status'    => 'error',
+            'data'      => null,
+            'message'   => ResponseStatusCodes::RESPONSE_STATUS_CODE_1001['message'],
+            'code'      => ResponseStatusCodes::RESPONSE_STATUS_CODE_1001['code'],
+        ]);
+    }
+
+    public function test_endpoint_change_state_returns_a_unauthorized_response(): void
+    {
+        $user = $this->createUser();
+        $task = Task::factory()->create([
+            'user_id'       => $user->id,
+            'title'         => fake()->words(fake()->numberBetween(6, 20), true),
+            'description'   => fake()->text(),
+            'status'        => TaskStatus::New->value,
+        ]);
+
+        $otherUser = $this->createUser();
+        Task::factory()->create([
+            'user_id'       => $otherUser->id,
+            'title'         => fake()->words(fake()->numberBetween(6, 20), true),
+            'description'   => fake()->text(),
+            'status'        => fake()->randomElement(TaskStatus::valuesAsArray()),
+        ]);
+
+        $response = $this->withBasicAuth($otherUser->email, "password")
+            ->put(route('tasks.changeState', $task->id),);
+
+        $response->assertStatus(400);
+        $response->assertJson([
+            'status'    => 'error',
+            'message'   => ResponseStatusCodes::RESPONSE_STATUS_CODE_1003['message'],
+            'code'      => ResponseStatusCodes::RESPONSE_STATUS_CODE_1003['code'],
+        ]);
+    }
+
     // DELETE endpoints
     public function test_endpoint_destroy_returns_a_successful_response(): void
     {
