@@ -7,6 +7,7 @@
 - `tasks_api_webserver` nginx
 - `tasks_api_db` baza Postgres
 - `tasks_api_redis` Redis
+#### Serwer będzie uruchomiony na portu `91`, dokładnie to `http://localhost:91`
 
 ### 3. Dodajemy alias'y (opcjonalne):
 - `alias tasks_api_app_runa="docker-compose run --rm tasks_api_app php artisan "`
@@ -41,3 +42,6 @@
 
 ### Uruchomiamy testy: 
 - `tasks_api_app_runa test`
+
+### 9. Postman JSON plik endpointów (format: collection v2.1):
+- `tasks_api.postman_collection.json`
