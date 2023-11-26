@@ -53,7 +53,7 @@ class TaskController extends Controller
      */
     public function store(StoreTaskRequest $request, TaskService $taskService): JsonResponse
     {
-        if($this->authenticatedUser->cannot('store', Task::class)){
+        if($this->authenticatedUser->cannot('create', Task::class)){
             return $this->errorResponse(ResponseStatusCodes::RESPONSE_STATUS_CODE_1003);
         }
 
@@ -103,7 +103,7 @@ class TaskController extends Controller
         TaskService $taskService
     ): JsonResponse
     {
-        $putTaskForm = PutTaskForm::fromArray($request->validated());
+        $putTaskForm = PutTaskForm::fromArray($request->validated(), $id);
 
         $task = Task::query()
             ->findOrFail($id);
