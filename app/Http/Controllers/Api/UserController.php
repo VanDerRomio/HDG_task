@@ -27,6 +27,10 @@ class UserController extends Controller
      */
     public function index(): JsonResponse
     {
+        if($this->authenticatedUser->cannot('viewAny', User::class)){
+            return $this->errorResponse(ResponseStatusCodes::RESPONSE_STATUS_CODE_1003);
+        }
+
         $users = User::query()
             ->with('tasks')
             ->paginate(10);
@@ -41,6 +45,10 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request, UserService $userService): JsonResponse
     {
+        if($this->authenticatedUser->cannot('create', User::class)){
+            return $this->errorResponse(ResponseStatusCodes::RESPONSE_STATUS_CODE_1003);
+        }
+
         $postUserForm = PostUserForm::fromArray($request->validated());
 
         $user = $userService->create($postUserForm);
@@ -68,6 +76,10 @@ class UserController extends Controller
             return $this->errorResponse(ResponseStatusCodes::RESPONSE_STATUS_CODE_1011);
         }
 
+        if($this->authenticatedUser->cannot('view', $user)){
+            return $this->errorResponse(ResponseStatusCodes::RESPONSE_STATUS_CODE_1003);
+        }
+
         return $this->successResponse((new UserResource($user)));
     }
 
@@ -87,6 +99,10 @@ class UserController extends Controller
         $user = User::query()
             ->findOrFail($id);
 
+        if($this->authenticatedUser->cannot('update', $user)){
+            return $this->errorResponse(ResponseStatusCodes::RESPONSE_STATUS_CODE_1003);
+        }
+
         $updatedUser = $userService->update($user, $putUserForm);
 
         if($updatedUser){
@@ -105,6 +121,10 @@ class UserController extends Controller
     {
         $user = User::query()
             ->findOrFail($id);
+
+        if($this->authenticatedUser->cannot('delete', $user)){
+            return $this->errorResponse(ResponseStatusCodes::RESPONSE_STATUS_CODE_1003);
+        }
 
         $isDeleted = $userService->delete($user);
 
